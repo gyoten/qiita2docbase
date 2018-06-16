@@ -83,10 +83,14 @@ imported_articles.each do |key, value|
     qiita_articles[value['qiita']] = value['docbase']
 end
 
+total_skipped = 0
+
 qiita_articles.each do |qiita_url, docbase_url|
     if url_updated_articles.has_key?(docbase_url) then
-        puts "Article: #{docbase_url} is skipped."
-        next
+      total_skipped += 1
+
+      puts "Article: #{docbase_url} is skipped. Total Skipped: #{total_skipped}"
+      next
     end
 
     article_id = docbase_url.split("/").last
