@@ -25,9 +25,6 @@ end
 COOKIE_STR = credentials['COOKIE_STR']
 ACCESS_TOKEN = credentials['ACCESS_TOKEN']
 TEAM_DOMAIN = credentials['TEAM_DOMAIN']
-GROUP_ID = credentials['GROUP_ID']
-USER_IDS = credentials['USER_IDS']
-USER_ETC = credentials['USER_ETC']
 QIITA_TEAM = credentials['QIITA_TEAM']
 
 BASE_URL       = URI.parse('https://api.docbase.io')
@@ -41,49 +38,49 @@ def wait
   sleep(sleep_sec)
 end
 
+def getArticle(request_path)
+  http = Net::HTTP.new(BASE_URL.host, BASE_URL.port)
+  http.use_ssl = BASE_URL.scheme == 'https'
+
+  request = Net::HTTP::Get.new(request_path)
+  REQUEST_HEADER.each { |key, value| request.add_field(key, value) }
+
+  response = http.request(request)
+  response_body = JSON.parse(response.body)
+
+  if response.code == '200'
+    response_body
+  else
+    message = response_body['messages'].join("\n")
+    puts "Error: #{message}"
+    nil
+  end
+end
+
+def updateArticle(request_path, data)   
+  http = Net::HTTP.new(BASE_URL.host, BASE_URL.port)
+  http.use_ssl = BASE_URL.scheme == 'https'
+
+  request = Net::HTTP::Patch.new(request_path)
+  request.body = data
+  REQUEST_HEADER.each { |key, value| request.add_field(key, value) }
+
+  response = http.request(request)
+  response_body = JSON.parse(response.body)
+
+  if response.code == '200'
+    response_body
+  else
+    message = response_body['messages'].join("\n")
+    puts "Error: #{message}"
+    nil
+  end
+end
+
 qiita_articles = {}
 
 imported_articles.each do |key, value|
     qiita_articles[value['qiita']] = value['docbase']
-end
-
-def getArticle(request_path)
-    http = Net::HTTP.new(BASE_URL.host, BASE_URL.port)
-    http.use_ssl = BASE_URL.scheme == 'https'
-  
-    request = Net::HTTP::Get.new(request_path)
-    REQUEST_HEADER.each { |key, value| request.add_field(key, value) }
-  
-    response = http.request(request)
-    response_body = JSON.parse(response.body)
-  
-    if response.code == '200'
-      response_body
-    else
-      message = response_body['messages'].join("\n")
-      puts "Error: #{message}"
-      nil
-    end
-end
-
-def updateArticle(request_path, data)   
-    http = Net::HTTP.new(BASE_URL.host, BASE_URL.port)
-    http.use_ssl = BASE_URL.scheme == 'https'
-  
-    request = Net::HTTP::Patch.new(request_path)
-    request.body = data
-    REQUEST_HEADER.each { |key, value| request.add_field(key, value) }
-  
-    response = http.request(request)
-    response_body = JSON.parse(response.body)
-  
-    if response.code == '200'
-      response_body
-    else
-      message = response_body['messages'].join("\n")
-      puts "Error: #{message}"
-      nil
-    end
 end
 
 qiita_articles.each do |qiita_url, docbase_url|
